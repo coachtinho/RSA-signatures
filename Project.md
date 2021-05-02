@@ -34,11 +34,33 @@ Note: if any $e_i$ divides $\phi(N)$, then $\sigma$ may not be defined. In this 
 The verification algorithm first computes the appropriate primes as follows: for $i=1$ to $n$, it computes $e_i=H_{K,c}(M^{(i)})$. The algorithm accepts if and only if:
 $$\sigma^{\prod_{i=1}^ne_i}=h\ mod\ N$$
 
+# Weak to strong transformation
+Let chameleon hash family $\mathcal{H}$ map inputs as $\{0,1\}^l\times\{0,1\}^k\to\{0,1\}^n$.
+
+## KeyGen($1^\lambda$)
+Select a random chameleon hash $H\in\mathcal{H}$. Run $G(1^\lambda)$ to obtain key pair $(pk,sk)$. The public key is $PK=(pk,H)$ and the secret key is $SK=(sk,H)$.
+
+## Sign($SK,M\in\{0,1\}^l$)
+Pick a random $r\in\{0,1\}^k$. Compute $x=H(M,r)$, and then $\sigma^\prime\gets S(sk,x)$. Output signature $\sigma=(\sigma^\prime,r)$.
+
+## Verify($PK,M,\sigma$)
+Parse $\sigma$ as $(\sigma^\prime,r)$. Compute $x=H(M,r)$ and then output $V(pk,x,\sigma^\prime)$.
+
+# Chameleon Hashes based on RSA
+Let $l,\alpha$ be security parameters, where $\alpha$ is a constant fraction of $l$. Let $N$ be an RSA modulos such that $2^l<\phi(N)<2^{l+2}$. Choose a random positive $e\in\{0,1\}^l$ which is relatively prime to $\phi(N)$ and a random value $J\in\mathbb{Z}_N$. Set the public key as $(N,e,J)$ and keep as the trapdoor the factorization of $N$ as well as a value $d$ such that $ed=1\ mod\ \phi(N)$.
+The hash $H:\{0,1\}^\alpha\times\mathbb{Z}_N\to\mathbb{Z}_N$ takes two inputs and produces one output. The hash is computed as $H(m,r)=J^mr^e\ mod\ N$.
+
 # TODO
-+ [ ] How to find $l$
-+ [ ] Generation of primes $p^\prime$ and $q^\prime$
-+ [ ] Convert to strong signatures
++ [ ] Derive $l$ correctly
++ [ ] Optimize prime generation
++ [X] Convert to strong signatures
++ [ ] Read proof of security
+
+# Questions
++ Is $l$ derived from $\lambda$ and how or is it generated at random? Is it public?
++ How to handle constants(i.e. where to store them)
 
 # Sources
 + [Pseudo-Random functions](https://crypto.stanford.edu/pbc/notes/crypto/prf.html)
 + [Python random](https://docs.python.org/3/library/random.html#functions-for-integers)
++ [Primality test](https://en.wikipedia.org/wiki/Primality_test)
