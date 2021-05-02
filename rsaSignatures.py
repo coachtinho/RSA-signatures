@@ -20,7 +20,7 @@ def isPrime(n: int) -> bool:
 def mulList(l: list) -> int:
     return reduce(lambda x, y: x * y, l)
 
-class Config:
+class KeyPair:
 
     # Security parameters above 12 take a while to generate
     def __init__(self, secParam: int):
@@ -67,8 +67,8 @@ class Config:
         # Generate c
         c = random.getrandbits(l)
 
-        self.PK = (N, h, c, K)
-        self.SK = (p, q, h, c, K)
+        self.pk = {"N": N, "h": h, "c": c, "K": K}
+        self.sk = {"p": p, "q": q, "h": h, "c": c, "K": K}
 
 def genSeed(integers: list) -> str:
     """Converts list of integer into a string that can be used as the seed for the PRF"""
@@ -99,6 +99,7 @@ def hashInteger(i: int) -> int:
     size = math.ceil(len(bits) / 8)
     hash.update(i.to_bytes(size, "big"))
     digest = hash.digest()
+
     return int.from_bytes(digest, "big")
 
 def parseMessage(message: Union[int, str]) -> int:
@@ -123,16 +124,16 @@ def chameleonHash(m: int, r: int, J: int, e: int, N: int) -> int:
 
     return result % N
 
-def sign(SK: tuple, M: int, l: int) -> int:
+def sign(sk: dict, M: int, l: int) -> int:
     """Generic signing operation"""
     bits = bin(M)[2:]
 
-    N = SK[0] * SK[1]
-    phiN = (SK[0] - 1) * (SK[1] - 1)
+    N = sk["p"] * sk["q"]
+    phiN = (sk["p"] - 1) * (sk["q"] - 1)
 
     exponents = []
     for i in range(1, len(bits) + 1):
-        exponent = H(l, SK[4], SK[3], int(bits[:i], 2))
+        exponent = H(l, sk["K"], sk["c"], int(bits[:i], 2))
         
         # According to the paper this happens with negligible probability
         if phiN % exponent == 0:
@@ -141,56 +142,53 @@ def sign(SK: tuple, M: int, l: int) -> int:
         inv = pow(exponent, -1, phiN)
         exponents.append(inv)
 
-    signature = pow(SK[2], mulList(exponents), N)
+    signature = pow(sk["h"], mulList(exponents), N)
 
     return signature
 
-def verify(PK: tuple, M: int, signature: int, l: int) -> bool:
+def verify(pk: dict, M: int, signature: int, l: int) -> bool:
     """Generic verifying operation"""
     bits = bin(M)[2:]
 
-    N = PK[0]
-
     exponents = []
     for i in range(1, len(bits) + 1):
-        exponent = H(l, PK[3], PK[2], int(bits[:i], 2))
+        exponent = H(l, pk["K"], pk["c"], int(bits[:i], 2))
         exponents.append(exponent)
 
-    h = pow(signature, mulList(exponents), N)
+    h = pow(signature, mulList(exponents), pk["N"])
 
-    return h == PK[1]
+    return h == pk["h"]
 
-def weakSign(SK: tuple, message: Union[int, str], constants: dict) -> int:
+def weakSign(sk: dict, message: Union[int, str], constants: dict) -> int:
     """Signing operation that respects weak unforgeability"""
     M = parseMessage(message)
 
-    return sign(SK, M, constants["l"])
+    return sign(sk, M, constants["l"])
 
-def weakVerify(PK: tuple, message: Union[int, str], signature: int, constants: dict) -> bool:
+def weakVerify(pk: dict, message: Union[int, str], signature: int, constants: dict) -> bool:
     """Verifying operation that respects weak unforgeability"""
     M = parseMessage(message)
 
-    return verify(PK, M, signature, constants["l"])
+    return verify(pk, M, signature, constants["l"])
 
-def strongSign(SK: tuple, message: Union[int, str], constants: dict) -> tuple:
+def strongSign(sk: dict, message: Union[int, str], constants: dict) -> tuple:
     """Signing operation that respects strong unforgeability"""
     M = parseMessage(message)
-    N = SK[0] * SK[1]
+    N = sk["p"] * sk["q"]
 
     random.seed()
     r = random.randint(0, N - 1)
     x = chameleonHash(M, r, constants["J"], constants["e"], N)
-    signature = sign(SK, x, constants["l"])
+    signature = sign(sk, x, constants["l"])
 
     return (signature, r)
 
-def strongVerify(PK: tuple, message: Union[int, str], signature: tuple, constants: dict) -> bool:
+def strongVerify(pk: dict, message: Union[int, str], signature: tuple, constants: dict) -> bool:
     """Verifying operation that respects strong unforgeability"""
     M = parseMessage(message)
-    N = PK[0]
     sig = signature[0]
     r = signature[1]
 
-    x = chameleonHash(M, r, constants["J"], constants["e"], N)
+    x = chameleonHash(M, r, constants["J"], constants["e"], pk["N"])
 
-    return verify(PK, x, sig, constants["l"])
+    return verify(pk, x, sig, constants["l"])
