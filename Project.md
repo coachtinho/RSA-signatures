@@ -51,14 +51,15 @@ Let $l,\alpha$ be security parameters, where $\alpha$ is a constant fraction of 
 The hash $H:\{0,1\}^\alpha\times\mathbb{Z}_N\to\mathbb{Z}_N$ takes two inputs and produces one output. The hash is computed as $H(m,r)=J^mr^e\ mod\ N$.
 
 # TODO
-+ [ ] Derive $l$ correctly
-+ [ ] Optimize prime generation
++ [ ] Derive $l$ correctly (waiting on next problem class)
++ [ ] Optimize prime generation (waiting on lecture notes)
 + [X] Convert to strong signatures
-+ [ ] Read proof of security
++ [X] Read proof of security
++ [ ] Optimizations? (Section 5 of paper)
 
 # Questions
 + Is $l$ derived from $\lambda$ and how or is it generated at random? Is it public?
-+ How to handle constants(i.e. where to store them)
++ How to handle constants (i.e. where to store them)
 
 # Sources
 + [Pseudo-Random functions](https://crypto.stanford.edu/pbc/notes/crypto/prf.html)

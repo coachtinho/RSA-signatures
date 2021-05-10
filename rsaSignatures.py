@@ -28,7 +28,7 @@ class KeyPair:
         random.seed()
         # Generate all primes that have security parameter - 1 number of bits
         # so when they are turned into safe primes they have security parameter number of bits
-        primes = [x for x in range(1 << (secParam - 2), (1 << secParam - 1) - 2) if isPrime(x)] 
+        primes = [x for x in range(1 << (secParam - 2), 1 << (secParam - 1)) if isPrime(x)] 
         if len(primes) < 2:
             raise ValueError("not enough primes generated")
 
