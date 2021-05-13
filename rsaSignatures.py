@@ -4,6 +4,7 @@ from functools import reduce
 from hashlib import sha256
 from typing import Union
 
+# Auxiliary functions
 def isPrime(n: int) -> bool:
     """Primality test using 6k+-1 optimization"""
     if n <= 3:
@@ -18,7 +19,12 @@ def isPrime(n: int) -> bool:
     return True
 
 def mulList(l: list) -> int:
+    """Multiply all elements in list"""
     return reduce(lambda x, y: x * y, l)
+
+def genSeed(integers: list) -> str:
+    """Converts list of integer into a string that can be used as the seed for the PRF"""
+    return reduce(lambda x, y: str(x) + str(y), integers)
 
 class KeyPair:
 
@@ -54,6 +60,8 @@ class KeyPair:
 
         # Generate e
         e = random.getrandbits(l)
+        while math.gcd(e, phiN) != 1:
+            e = random.getrandbits(l)
 
         self.constants = {"l": l, "J": J, "e": e}
 
@@ -69,14 +77,6 @@ class KeyPair:
 
         self.pk = {"N": N, "h": h, "c": c, "K": K}
         self.sk = {"p": p, "q": q, "h": h, "c": c, "K": K}
-
-def genSeed(integers: list) -> str:
-    """Converts list of integer into a string that can be used as the seed for the PRF"""
-    seed = ""
-    for i in integers:
-        seed += str(i)
-
-    return seed
 
 def H(l: int, K: int, c: int, z: int) -> int:
     """H function used to generate exponents"""

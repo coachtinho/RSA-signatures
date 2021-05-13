@@ -23,7 +23,7 @@ where $i$, called the *resolving index* for $z$, is the smallest $i\geq1$ such t
 **Public key:** $(N,h,c,K)$
 **Secret key:** $(p,q,h,c,K)$
 
-[^1]: Safe prime: $p=2p^\prime+1$
+[^1]: Safe prime: $p=2q+1$ with $q$ prime
 
 ## Sign($SK,M\in\{0,1\}^n$)
 To sign messages larger than $n$ bits, one could apply a collision-resistant hash function to the message. Let $M^{(i)}$ denote the first $i$ bits of $M$. For $i=1$ to $n$, it computes $e_i=H_{K,c}(M^{(i)})$. Finally it outputs the signature:
