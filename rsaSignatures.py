@@ -26,35 +26,40 @@ def genSeed(integers: list) -> str:
     """Converts list of integer into a string that can be used as the seed for the PRF"""
     return reduce(lambda x, y: str(x) + str(y), integers)
 
-class KeyPair:
 
+class KeyPair:
     # Security parameters above 12 take a while to generate
     def __init__(self, secParam: int):
         """Generates key pair and all necessary constants"""
+
+        if secParam < 6:
+            raise ValueError("security parameter too low")
+
         random.seed()
+
+        # Derive l
+        l = 2 * secParam - 2
+
         # Generate all primes that have security parameter - 1 number of bits
         # so when they are turned into safe primes they have security parameter number of bits
         primes = [x for x in range(1 << (secParam - 2), 1 << (secParam - 1)) if isPrime(x)] 
-        if len(primes) < 2:
-            raise ValueError("not enough primes generated")
 
         # Generate safe primes
         p = 0
         q = 0
-        while not isPrime(p):
-            pPrime = random.choice(primes)
-            p = 2 * pPrime + 1
-        while not isPrime(q) or q == p:
-            qPrime = random.choice(primes)
-            q = 2 * qPrime + 1
+        phiN = (p - 1) * (q - 1)
+        while phiN <= (1 << l) or phiN >= (1 << (l + 2)):
+            while not isPrime(p):
+                pPrime = random.choice(primes)
+                p = 2 * pPrime + 1
+            while not isPrime(q) or q == p:
+                qPrime = random.choice(primes)
+                q = 2 * qPrime + 1
+            phiN = (p - 1) * (q - 1)
 
         N = p * q
-        phiN = (p - 1) * (q - 1)
 
         # Generate constants
-        # Derive l
-        l = int(math.log(phiN, 2))
-
         # Generate J
         J = random.randint(0, N - 1)
 
@@ -113,7 +118,7 @@ def parseMessage(message: Union[int, str]) -> int:
         raise ValueError("message must be string or integer")
 
     # Max size of message is 256 bits
-    if M >= 1 << 255:
+    if M >= 1 << 256:
         M = hashInteger(M)
 
     return M

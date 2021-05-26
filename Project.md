@@ -50,17 +50,6 @@ Parse $\sigma$ as $(\sigma^\prime,r)$. Compute $x=H(M,r)$ and then output $V(pk,
 Let $l,\alpha$ be security parameters, where $\alpha$ is a constant fraction of $l$. Let $N$ be an RSA modulos such that $2^l<\phi(N)<2^{l+2}$. Choose a random positive $e\in\{0,1\}^l$ which is relatively prime to $\phi(N)$ and a random value $J\in\mathbb{Z}_N$. Set the public key as $(N,e,J)$ and keep as the trapdoor the factorization of $N$ as well as a value $d$ such that $ed=1\ mod\ \phi(N)$.
 The hash $H:\{0,1\}^\alpha\times\mathbb{Z}_N\to\mathbb{Z}_N$ takes two inputs and produces one output. The hash is computed as $H(m,r)=J^mr^e\ mod\ N$.
 
-# TODO
-+ [ ] Derive $l$ correctly (waiting on next problem class)
-+ [ ] Optimize prime generation (waiting on lecture notes)
-+ [X] Convert to strong signatures
-+ [X] Read proof of security
-+ [ ] Optimizations? (Section 5 of paper)
-
-# Questions
-+ Is $l$ derived from $\lambda$ and how or is it generated at random? Is it public?
-+ How to handle constants (i.e. where to store them)
-
 # Sources
 + [Pseudo-Random functions](https://crypto.stanford.edu/pbc/notes/crypto/prf.html)
 + [Python random](https://docs.python.org/3/library/random.html#functions-for-integers)
