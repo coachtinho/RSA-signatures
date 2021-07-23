@@ -24,3 +24,6 @@ if __name__ == '__main__':
 
     print("Weak: ", weak)
     print("Strong: ", strong)
+
+    if not weak or not strong:
+        sys.exit(1)
